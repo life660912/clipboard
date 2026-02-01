@@ -9,6 +9,12 @@ const firebaseConfig = {
   measurementId: "G-XFBZMTRXCZ"
 };
 
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.getAuth(app);
+const db = firebase.getFirestore(app);
+
+
 // 3. Login / Logout
 document.getElementById("loginBtn").onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
