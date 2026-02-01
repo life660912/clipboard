@@ -9,6 +9,38 @@ const firebaseConfig = {
   measurementId: "G-XFBZMTRXCZ"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// 3. Login / Logout
+document.getElementById("loginBtn").onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+};
+
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut();
+};
+
+// 4. Save clipboard text
+document.getElementById("saveBtn").onclick = () => {
+  const text = document.getElementById("clipboardInput").value;
+  if (auth.currentUser) {
+    db.collection("clipboard").add({
+      text: text,
+      user: auth.currentUser.email,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } else {
+    alert("Please login first!");
+  }
+};
+
+// 5. Listen for updates
+db.collection("clipboard")
+  .orderBy("timestamp", "desc")
+  .onSnapshot(snapshot => {
+    const output = document.getElementById("clipboardOutput");
+    output.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      output.innerHTML += `<p>${data.user}: ${data.text}</p>`;
+    });
+  });
