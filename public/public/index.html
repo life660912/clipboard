@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Clipboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- CodeMirror for Jupyter-like editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/markdown/markdown.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Auth Section -->
+        <div id="auth-section" class="container">
+            <div class="auth-card">
+                <h1><i class="fas fa-clipboard"></i> Live Clipboard</h1>
+                <p class="subtitle">Real-time text synchronization across all your devices</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Real-time sync</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Multi-platform</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-save"></i>
+                        <span>Auto-save</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-broom"></i>
+                        <span>Auto-cleanup</span>
+                    </div>
+                </div>
+                
+                <button id="google-signin" class="btn-google">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+                
+                <div class="info">
+                    <p><i class="fas fa-info-circle"></i> You can restrict access to specific domains in Firebase Console</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App (Hidden initially) -->
+        <div id="main-app" class="container hidden">
+            <header class="app-header">
+                <div class="header-left">
+                    <h2><i class="fas fa-clipboard"></i> Live Clipboard</h2>
+                    <div class="user-info">
+                        <img id="user-avatar" class="avatar" alt="User Avatar">
+                        <span id="user-name"></span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="new-room" class="btn-secondary">
+                        <i class="fas fa-plus"></i> New Room
+                    </button>
+                    <button id="signout" class="btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Sign Out
+                    </button>
+                </div>
+            </header>
+
+            <div class="app-content">
+                <!-- Room Management -->
+                <div class="room-section">
+                    <div class="room-header">
+                        <h3><i class="fas fa-door-open"></i> Current Room</h3>
+                        <div class="room-controls">
+                            <input type="text" id="room-id" readonly>
+                            <button id="copy-room" class="btn-icon" title="Copy Room ID">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button id="share-room" class="btn-icon" title="Share Room">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="room-list">
+                        <h4><i class="fas fa-history"></i> Recent Rooms</h4>
+                        <div id="rooms-container"></div>
+                    </div>
+                </div>
+
+                <!-- Editor Section -->
+                <div class="editor-section">
+                    <div class="editor-header">
+                        <h3><i class="fas fa-edit"></i> Jupyter-like Notebook</h3>
+                        <div class="editor-info">
+                            <span id="save-status" class="status-saved">
+                                <i class="fas fa-check-circle"></i> Saved
+                            </span>
+                            <span id="user-count" class="user-count">
+                                <i class="fas fa-users"></i> <span>1</span> online
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div id="editor-container">
+                        <textarea id="clipboard-editor" placeholder="Start typing here... Your changes sync automatically across all devices."></textarea>
+                    </div>
+                    
+                    <div class="editor-footer">
+                        <div class="stats">
+                            <span><i class="fas fa-clock"></i> Auto-saves every 2s</span>
+                            <span><i class="fas fa-trash-alt"></i> Auto-cleanup: 7 days / 10 items</span>
+                        </div>
+                        <div class="actions">
+                            <button id="clear-editor" class="btn-warning">
+                                <i class="fas fa-broom"></i> Clear
+                            </button>
+                            <button id="download-text" class="btn-secondary">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Join Modal -->
+        <div id="room-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3><i class="fas fa-door-open"></i> Join or Create Room</h3>
+                <input type="text" id="room-input" placeholder="Enter Room ID or leave empty for new room">
+                <div class="modal-actions">
+                    <button id="join-room" class="btn-primary">Join Room</button>
+                    <button id="close-modal" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
